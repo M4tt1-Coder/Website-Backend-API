@@ -13,7 +13,6 @@ import (
 
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("try to authenticate")
 		if r.Header["Auth_key"] != nil {
 			//get the api key from the environment variable
 			envs, err := godotenv.Read(".env")

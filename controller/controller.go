@@ -401,19 +401,9 @@ func UpdateAdmin(w http.ResponseWriter, r *http.Request) {
 	//lastName
 	lastName := vars["lastName"]
 	//password
-	Password := vars["Password"]
-	//deletable
-	// deletable, err := strconv.ParseBool(vars["deletable"])
-	// if err != nil {
-	// 	log.Printf("Error parsing: %v", err)
-	// }
+	Password := vars["password"]
 	// //rights
 	rights := vars["rights"]
-	//lastTimeOnline
-	lastTimeOnline, err := time.Parse("2006-01-02 00:00:00", vars["lastTimeOnline"])
-	if err != nil {
-		log.Printf("Error parsing: %v", err)
-	}
 	//emailaddress
 	emailaddress := vars["emailAddress"]
 	//adminid
@@ -422,7 +412,7 @@ func UpdateAdmin(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed: %v", error)
 	}
 	//update admin with the new values
-	admin := models.UpdateAdminbyID(id, firstName, lastName, Password, rights, lastTimeOnline, adminid, emailaddress)
+	admin := models.UpdateAdminbyID(id, firstName, lastName, Password, rights, adminid, emailaddress)
 	res, _ := json.Marshal(admin)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

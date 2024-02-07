@@ -376,20 +376,23 @@ func GetAllAdmins() []Admin {
 
 func GetAdminByID(id uuid.UUID) (*Admin, *gorm.DB) {
 	var Admin Admin
-	db = db.Where("identifier =?", id).Find(&Admin)
+	//db = db.Where("identifier =?", id).Find(&Admin)
+	db := db.Find(&Admin, "identifier = ?", id)
 	if Admin.Identifier == uuid.Nil {
 		log.Print("admin not found")
 	}
 	return &Admin, db
 }
 
+// TODO - "adminId" isn't passed to the log function -> maybe because of the assingment before it has been used
 func DeleteAdminByID(id uuid.UUID, adminId uuid.UUID) Admin {
+	log.Printf("%v, %v", adminId, id)
 
 	var Admin Admin
-	db = db.Where("identifier =?", id).Delete(Admin)
+	db = db.Where("identifier = ?", id).Delete(&Admin)
 
 	CreateLog(adminId,
-		"admin deleted"+"||"+"id: "+id.String(),
+		"admin deleted"+" || "+"id: "+id.String(),
 		"admin table",
 	)
 
@@ -402,7 +405,6 @@ func UpdateAdminbyID(
 	LastName string,
 	Password string,
 	Rights string,
-	LastTimeOnline time.Time,
 	adminId uuid.UUID,
 	EmailAddress string,
 ) *Admin {
@@ -425,10 +427,6 @@ func UpdateAdminbyID(
 	if Rights != "" {
 		builder.WriteString("Rights: " + a.Rights + " -> " + Rights + "||")
 		a.Rights = Rights
-	}
-	if !LastTimeOnline.IsZero() {
-		builder.WriteString("LastTimeOnline: " + a.LastTimeOnline.Format("2006-01-01 00:00:00") + " -> " + LastTimeOnline.Format("2006-01-01 00:00:00") + "||")
-		a.LastTimeOnline = LastTimeOnline
 	}
 	if EmailAddress != "" {
 		builder.WriteString("EmailAddress: " + a.EmailAddress + "->" + EmailAddress + "||")
