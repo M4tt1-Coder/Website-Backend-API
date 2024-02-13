@@ -7,12 +7,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 
 	"github.com/M4tt1-Coder/business/portfolio_website/API_GO/dbHandler"
-	dblogger "github.com/M4tt1-Coder/business/portfolio_website/API_GO/dbLogger"
 
 	//"github.com/jinzhu/gorm"
 	"gorm.io/gorm"
+)
+
+var (
+	envs, _ = godotenv.Read(".env")
 )
 
 // global database instance in this file
@@ -110,7 +114,7 @@ func init() {
 }
 
 // Partner functions
-func (p *Partner) CreatePartner(adminID uuid.UUID) *Partner {
+func (p *Partner) CreatePartner(adminID *uuid.UUID) *Partner {
 
 	//db.NewRecord(p)
 	db.Create(p)
@@ -133,17 +137,17 @@ func GetAllPartners() []Partner {
 	return partners
 }
 
-func GetPartnerByID(id uuid.UUID) (*Partner, *gorm.DB) {
+func GetPartnerByID(id *uuid.UUID) (*Partner, *gorm.DB) {
 	var Partner Partner
-	db = db.Where("identifier =?", id).First(&Partner)
+	db := db.Find(&Partner, "identifier = ?", id)
 	return &Partner, db
 }
 
-func DeletePartnerByID(id uuid.UUID, adminID uuid.UUID) (Partner, *gorm.DB) {
+func DeletePartnerByID(id *uuid.UUID, adminID *uuid.UUID) (Partner, *gorm.DB) {
 
 	var Partner Partner
 	//maybe use gormodel id for deleting
-	db = db.Where("identifier =?", id).Delete(Partner)
+	db := db.Where("identifier =?", id).Delete(Partner)
 
 	CreateLog(adminID,
 		"partner deleted||id: "+id.String(),
@@ -154,13 +158,13 @@ func DeletePartnerByID(id uuid.UUID, adminID uuid.UUID) (Partner, *gorm.DB) {
 }
 
 func UpdatePartnerByID(
-	id uuid.UUID,
+	id *uuid.UUID,
 	name string,
 	websiteLink string,
 	sinceWhen time.Time,
 	address string,
 	telephoneNumber string,
-	adminID uuid.UUID) *Partner {
+	adminID *uuid.UUID) *Partner {
 	//get changes that were made
 
 	builder := strings.Builder{}
@@ -200,7 +204,7 @@ func UpdatePartnerByID(
 
 //Project functions
 
-func (p *Project) CreateProject(adminId uuid.UUID) *Project {
+func (p *Project) CreateProject(adminId *uuid.UUID) *Project {
 	//db.NewRecord(p)
 	db.Create(&p)
 
@@ -221,16 +225,16 @@ func GetAllProjects() []Project {
 	return Projects
 }
 
-func GetProjectByID(id uuid.UUID) (*Project, *gorm.DB) {
+func GetProjectByID(id *uuid.UUID) (*Project, *gorm.DB) {
 	var Project Project
-	db = db.Where("identifier =?", id).First(&Project)
+	db := db.Where("identifier =?", id).First(&Project)
 	return &Project, db
 }
 
-func DeleteProjectByID(id uuid.UUID, adminID uuid.UUID) Project {
+func DeleteProjectByID(id *uuid.UUID, adminID *uuid.UUID) Project {
 
 	var Project Project
-	db.Where("identifier =?", id).Delete(Project)
+	db.Where("identifier = ?", id).Delete(Project)
 
 	CreateLog(adminID,
 		"project deleted||id: "+id.String(),
@@ -241,12 +245,12 @@ func DeleteProjectByID(id uuid.UUID, adminID uuid.UUID) Project {
 }
 
 func UpdateProjectByID(
-	id uuid.UUID,
+	id *uuid.UUID,
 	name string,
 	link string,
 	description string,
 	participants string,
-	adminID uuid.UUID,
+	adminID *uuid.UUID,
 ) *Project {
 	builder := strings.Builder{}
 	//var changes string
@@ -288,15 +292,18 @@ func GetAllMessages() []Message {
 	return Messages
 }
 
-func GetMessageByID(id uuid.UUID) (*Message, *gorm.DB) {
+func GetMessageByID(id *uuid.UUID) (*Message, *gorm.DB) {
 	var Message Message
-	db = db.Where("identifier =?", id).First(&Message)
+	db := db.Find(&Message, "identifier = ?", id)
 	return &Message, db
 }
 
-func DeleteMessageByID(id uuid.UUID, adminID uuid.UUID) Message {
+func DeleteMessageByID(id *uuid.UUID, adminID *uuid.UUID) Message {
 	var Message Message
-	db = db.Where("identifier =?", id).Delete(Message)
+	db := db.Where("identifier =?", id).Delete(Message)
+	if db.Error != nil {
+		log.Printf("Error deleting message")
+	}
 
 	CreateLog(adminID,
 		"message deleted"+"||"+"id: "+id.String(),
@@ -307,14 +314,14 @@ func DeleteMessageByID(id uuid.UUID, adminID uuid.UUID) Message {
 }
 
 func UpdateMessageByID(
-	id uuid.UUID,
+	id *uuid.UUID,
 	content string,
 	subject string,
 	createdAt time.Time,
 	emailAddress string,
 	senderName string,
 	gender string,
-	adminId uuid.UUID,
+	adminId *uuid.UUID,
 ) *Message {
 	//var changes string
 	builder := strings.Builder{}
@@ -353,7 +360,7 @@ func UpdateMessageByID(
 
 //Admin functions
 
-func (a *Admin) CreateAdmin(adminID uuid.UUID) *Admin {
+func (a *Admin) CreateAdmin(adminID *uuid.UUID) *Admin {
 	//db.NewRecord(a)
 	db.Create(a)
 
@@ -374,7 +381,7 @@ func GetAllAdmins() []Admin {
 	return Admins
 }
 
-func GetAdminByID(id uuid.UUID) (*Admin, *gorm.DB) {
+func GetAdminByID(id *uuid.UUID) (*Admin, *gorm.DB) {
 	var Admin Admin
 	//db = db.Where("identifier =?", id).Find(&Admin)
 	db := db.Find(&Admin, "identifier = ?", id)
@@ -384,13 +391,12 @@ func GetAdminByID(id uuid.UUID) (*Admin, *gorm.DB) {
 	return &Admin, db
 }
 
-// TODO - "adminId" isn't passed to the log function -> maybe because of the assingment before it has been used
-func DeleteAdminByID(id uuid.UUID, adminId uuid.UUID) Admin {
-	log.Printf("%v, %v", adminId, id)
-
+func DeleteAdminByID(id *uuid.UUID, adminId *uuid.UUID) Admin {
 	var Admin Admin
-	db = db.Where("identifier = ?", id).Delete(&Admin)
-
+	db := db.Where("identifier = ?", id).Delete(&Admin)
+	if db.Error != nil {
+		log.Printf("Error deleting admin %v", db.Error)
+	}
 	CreateLog(adminId,
 		"admin deleted"+" || "+"id: "+id.String(),
 		"admin table",
@@ -400,12 +406,12 @@ func DeleteAdminByID(id uuid.UUID, adminId uuid.UUID) Admin {
 }
 
 func UpdateAdminbyID(
-	id uuid.UUID,
+	id *uuid.UUID,
 	FirstName string,
 	LastName string,
 	Password string,
 	Rights string,
-	adminId uuid.UUID,
+	adminId *uuid.UUID,
 	EmailAddress string,
 ) *Admin {
 	//var changes string
@@ -440,7 +446,7 @@ func UpdateAdminbyID(
 	return a
 }
 
-func LastTimeOnline(id uuid.UUID) Admin {
+func LastTimeOnline(id *uuid.UUID) Admin {
 	admin, _ := GetAdminByID(id)
 	admin.LastTimeOnline = time.Now()
 	db.Save(&admin)
@@ -465,10 +471,12 @@ func GetInfoCard() InfoCard {
 
 //Log functions
 
-func CreateLog(AdminID uuid.UUID, changes string, where string) {
+func CreateLog(AdminID *uuid.UUID, changes string, where string) {
 	//instanciate db
-	dblogger.Init()
-	Db := dblogger.GetDB()
+	if AdminID.String() == envs["WRONG_ADMIN_ID_FORMAT"] || len(changes) == 0 || len(where) == 0 {
+		log.Printf("Failed to log an activity due to an invalid admin ID: %v", AdminID)
+		return
+	}
 	Admin, _ := GetAdminByID(AdminID)
 	log := Log{
 		Time:    time.Now(),
@@ -477,8 +485,7 @@ func CreateLog(AdminID uuid.UUID, changes string, where string) {
 		Where:   where,
 	}
 
-	Db.NewRecord(log)
-	Db.Create(&log)
+	db.Create(&log)
 }
 
 //try to call in the controller functions

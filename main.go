@@ -11,7 +11,6 @@ import (
 )
 
 //TODO - http request should only need one attemp to get the requested resource
-//TODO - implement that errors will be handled this way that the server still returns the data it should without a deadlock
 
 func main() {
 	r := mux.NewRouter()
