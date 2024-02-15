@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//TODO - http request should only need one attemp to get the requested resource
+
 func main() {
 	r := mux.NewRouter()
 	routes.AllRoutes(r)
@@ -26,6 +28,4 @@ func main() {
 	)(r)))
 	//add a authentication
 	//redirect to https
-
-	//test comment
 }
