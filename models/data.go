@@ -48,15 +48,15 @@ type Project struct {
 	Participants string    `grom:"Participants" json:"participants"`
 }
 
-type InfoCard struct {
-	//gorm.Model
-	Name           string `gorm:"Name" json:"name"`
-	Age            int    `gorm:"Age" json:"age"`
-	CurrentJob     string `gorm:"CurrentJob" json:"currentJob"`
-	CurrentCompany string `gorm:"CurrentCompany" json:"currentCompany"`
-	Summary        string `gorm:"Summary" json:"summary"`
-	Address        string `gorm:"Address" json:"address"`
-}
+// type InfoCard struct {
+// 	//gorm.Model
+// 	Name           string `gorm:"Name" json:"name"`
+// 	Age            int    `gorm:"Age" json:"age"`
+// 	CurrentJob     string `gorm:"CurrentJob" json:"currentJob"`
+// 	CurrentCompany string `gorm:"CurrentCompany" json:"currentCompany"`
+// 	Summary        string `gorm:"Summary" json:"summary"`
+// 	Address        string `gorm:"Address" json:"address"`
+// }
 
 type Message struct {
 	//gorm.Model
@@ -106,7 +106,7 @@ func init() {
 	db.AutoMigrate(&Contact{})
 	db.AutoMigrate(&Partner{})
 	db.AutoMigrate(&Project{})
-	db.AutoMigrate(&InfoCard{})
+	//db.AutoMigrate(&InfoCard{})
 	db.AutoMigrate(&Message{})
 	db.AutoMigrate(&Admin{})
 	db.AutoMigrate(&Log{})
@@ -463,11 +463,11 @@ func GetContact() Contact {
 
 //InfoCard functions
 
-func GetInfoCard() InfoCard {
-	var InfoCard []InfoCard
-	db.Find(&InfoCard)
-	return InfoCard[0]
-}
+// func GetInfoCard() InfoCard {
+// 	var InfoCard []InfoCard
+// 	db.Find(&InfoCard)
+// 	return InfoCard[0]
+// }
 
 //Log functions
 

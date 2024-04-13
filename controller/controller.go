@@ -616,13 +616,13 @@ func GetContact(w http.ResponseWriter, r *http.Request) {
 
 //infoCard functions
 
-func GetInfoCard(w http.ResponseWriter, r *http.Request) {
-	infoCard := models.GetInfoCard()
-	res, err := json.Marshal(infoCard)
-	if err != nil {
-		log.Printf("Error marshalling info card: %v", err)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
-}
+// func GetInfoCard(w http.ResponseWriter, r *http.Request) {
+// 	infoCard := models.GetInfoCard()
+// 	res, err := json.Marshal(infoCard)
+// 	if err != nil {
+// 		log.Printf("Error marshalling info card: %v", err)
+// 	}
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	w.Write(res)
+// }
