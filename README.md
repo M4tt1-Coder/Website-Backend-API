@@ -1,4 +1,5 @@
 TODO - add Readme  
+TODO - Need to create a .env-file -> add to readme installation part
 TODO - add comments to all controller functions
 TODO - try using standard apis and plain SQL
 
