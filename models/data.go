@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/M4TT1-Coder/Hospital_manager/logic/dbHandler"
+	"github.com/M4tt1-Coder/business/portfolio_website/API_GO/dbhandler"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-
-	"github.com/M4tt1-Coder/business/portfolio_website/API_GO/dbHandler"
 
 	//"github.com/jinzhu/gorm"
 	"gorm.io/gorm"
@@ -93,7 +93,7 @@ type Log struct {
 // initialize the database
 func init() {
 	dbHandler.Connect()
-	db = dbHandler.GetDB()
+	db = dbhandler.GetDB()
 	//set up database tables
 	// db.AutoMigrate(
 	// 	&Contact{},

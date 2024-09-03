@@ -45,8 +45,25 @@ var (
 //functions for the portfolio website
 //-> partners
 
+// Mux function
+//
+// Creates a new partner entity in the database.
+//
+// Needs an admin id, of the admin that created the partner object.
+// In the HTTP-body of the request needs to be passed a JSON object containing a valid datatstructure.
+//
+// HTTP request body
+//
+//	{
+//			id: 'someID UUID',
+//			name: "Paul",
+//			websiteLink: "https://example.com",
+//			sinceWhen: "2015-00-00",
+//			address: "Your Street 1, 07777 Citi",
+//			telephoneNumber: "+123456789"
+//	}
 func CreatePartner(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+	vars := mux.Vars(r) // get the routes variables
 	adminid, error := uuid.Parse(vars["adminid"])
 	if error != nil {
 		log.Printf("Failed: %v", error)
@@ -68,6 +85,11 @@ func CreatePartner(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
+// MUX controller functions
+//
+// Doesn't need any route variables or http body.
+//
+// Loads all partner object from teh database.
 func GetAllPartners(w http.ResponseWriter, r *http.Request) {
 	partners := models.GetAllPartners()
 	res, _ := json.Marshal(partners)

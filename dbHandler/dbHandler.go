@@ -1,4 +1,4 @@
-package dbHandler
+package dbhandler
 
 import (
 	//"github.com/jinzhu/gorm"
