@@ -1,7 +1,8 @@
 TODO - add Readme  
-TODO - Need to create a .env-file -> add to readme installation part
-TODO - add comments to all controller functions
+TODO - add comments 
 TODO - try using standard apis and plain SQL
+TODO - Rework uuid format checking for all controller functions -> just need to check if the returned string is empty
+TODO - Handle all error cases
 
 # GoLang - REST Backend API
 
@@ -20,6 +21,8 @@ The main feature is the fetching of data from the database ( in my case from [My
 When a 'admin' logs in, the timestamp, which indicates when to the admin logged in the last time, will updated to the current time.  
 
 ## Installation
+
+Here, you find information about how to install the application.
 
 ### GoLang Setup
 
@@ -90,6 +93,25 @@ You need to install [Git](https://git-scm.com/), a version control tool, to pull
     It will copy the repository to your local location!
 
 Now, you are good to go!
+
+#### Environment Setup
+
+You need to prepare a `.env` - file with three variables.
+
+Open a terminal in the route folder of the project. Enter this command to create a `.env` - file: 
+```bash
+    touch .env
+```
+
+Now, add your variables to the file by coping this code-block and changing the value of the variables **_API_KEY_** & **_DECRYPTION_KEY_** to yours:  
+
+```bash
+    # Copy these variables into your .env file and add your variables values
+    API_KEY="Your API key to access the application through a HTTP request"
+    DECRYPTION_KEY="Add a secret key to decrypt the authentication header"
+```
+
+128-bit secret keys would be a good choice for good practice. You generate some [here](https://generate-random.org/encryption-key-generator?count=1&bytes=128&cipher=aes-256-cbc&string=&password=).
 
 ### Start the app
 

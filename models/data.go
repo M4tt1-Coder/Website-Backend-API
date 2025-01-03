@@ -23,12 +23,15 @@ var (
 var db *gorm.DB
 
 // models
+
+// Represents a contact object.
 type Contact struct {
 	TelephoneNumber string `gorm:"TelephoneNumber" json:"telephoneNumber"`
 	EmailAddress    string `gorm:"EmailAddress" json:"emailAddress"`
 	Address         string `gorm:"Address" json:"address"`
 }
 
+// A person the cooperated on a project.
 type Partner struct {
 	//gorm.Model
 	Identifier      uuid.UUID `gorm:"primaryKey" json:"id"`
@@ -39,6 +42,7 @@ type Partner struct {
 	TelephoneNumber string    `gorm:"TelephoneNumber" json:"telephoneNumber"`
 }
 
+// A repository or project you worked on with participant / partners.
 type Project struct {
 	//gorm.Model
 	Identifier   uuid.UUID `gorm:"primaryKey" json:"id"`
@@ -48,16 +52,7 @@ type Project struct {
 	Participants string    `grom:"Participants" json:"participants"`
 }
 
-// type InfoCard struct {
-// 	//gorm.Model
-// 	Name           string `gorm:"Name" json:"name"`
-// 	Age            int    `gorm:"Age" json:"age"`
-// 	CurrentJob     string `gorm:"CurrentJob" json:"currentJob"`
-// 	CurrentCompany string `gorm:"CurrentCompany" json:"currentCompany"`
-// 	Summary        string `gorm:"Summary" json:"summary"`
-// 	Address        string `gorm:"Address" json:"address"`
-// }
-
+// A message received from the frontend.
 type Message struct {
 	//gorm.Model
 	Identifier   uuid.UUID `gorm:"primaryKey" json:"id"`
@@ -69,8 +64,8 @@ type Message struct {
 	Gender       string    `gorm:"Gender" json:"gender"`
 }
 
+// Like user with different permissions.
 type Admin struct {
-	//gorm.Model
 	Identifier     uuid.UUID `gorm:"primaryKey" json:"id"`
 	FirstName      string    `gorm:"FirstName" json:"firstName"`
 	LastName       string    `gorm:"LastName" json:"lastName"`
@@ -81,8 +76,8 @@ type Admin struct {
 	EmailAddress   string    `gorm:"EmailAddress" json:"emailAddress"`
 }
 
+// An logging entry about activities like creating, updating or deleting an message.
 type Log struct {
-	//gorm.Model
 	Identifier uint      `gorm:"primaryKey"`
 	Time       time.Time `gorm:"Time"`
 	Admin      uuid.UUID `gorm:"AdminID"`
@@ -94,19 +89,9 @@ type Log struct {
 func init() {
 	dbHandler.Connect()
 	db = dbhandler.GetDB()
-	//set up database tables
-	// db.AutoMigrate(
-	// 	&Contact{},
-	// 	&Partner{},
-	// 	&Project{},
-	// 	&InfoCard{},
-	// 	&Message{},
-	// 	&Admin{},
-	// 	&Log{})
 	db.AutoMigrate(&Contact{})
 	db.AutoMigrate(&Partner{})
 	db.AutoMigrate(&Project{})
-	//db.AutoMigrate(&InfoCard{})
 	db.AutoMigrate(&Message{})
 	db.AutoMigrate(&Admin{})
 	db.AutoMigrate(&Log{})
