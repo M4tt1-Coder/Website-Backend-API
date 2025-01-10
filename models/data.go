@@ -456,6 +456,9 @@ func GetContact() Contact {
 
 //Log functions
 
+// Saves logs to a local database.
+//
+// The admin made changes to data, the time stamp is saved along side the log.
 func CreateLog(AdminID *uuid.UUID, changes string, where string) {
 	//instanciate db
 	if AdminID.String() == envs["WRONG_ADMIN_ID_FORMAT"] || len(changes) == 0 || len(where) == 0 {
