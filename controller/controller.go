@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/M4tt1-Coder/business/portfolio_website/API_GO/models"
+	"github.com/M4tt1-Coder/business/portfolio_website/API_GO/utils"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 
@@ -17,34 +18,6 @@ import (
 var (
 	envs, _ = godotenv.Read(".env")
 )
-
-//!Info!
-//-> the layout for timedata types is: a in JSON bodies 2022-11-25T15:04:05Z
-
-// helper functions
-// func split(tosplit string, sep rune) []string {
-// 	var fields []string
-
-//main adminif
-//-> 5f36a786-3846-11ee-9517-947caef5c0e1
-
-// 	last := 0
-// 	for i, c := range tosplit {
-// 		if c == sep {
-// 			// Found the separator, append a slice
-// 			fields = append(fields, string(tosplit[last:i]))
-// 			last = i + 1
-// 		}
-// 	}
-
-// 	// Don't forget the last field
-// 	fields = append(fields, string(tosplit[last:]))
-
-// 	return fields
-// }
-
-//functions for the portfolio website
-//-> partners
 
 // Creates a new partner entity in the database.
 //
@@ -66,8 +39,11 @@ func CreatePartner(w http.ResponseWriter, r *http.Request) {
 	adminid, error := uuid.Parse(vars["adminid"])
 	if error != nil {
 		log.Printf("Failed: %v", error)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
+		log.Printf("The passed adminid is invalid! Wrong Format %v", adminid.String())
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
@@ -75,10 +51,17 @@ func CreatePartner(w http.ResponseWriter, r *http.Request) {
 	var partner models.Partner
 	err := decoder.Decode(&partner)
 	if err != nil {
-		log.Printf("Error decoding: %v", err)
+		log.Printf("Error decoding the partner object in the request's body: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	partner = *partner.CreatePartner(&adminid)
-	res, _ := json.Marshal(partner)
+	res, err := json.Marshal(partner)
+	if err != nil {
+		log.Printf("The partner couldn't be parsed into a JSON object: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -89,7 +72,12 @@ func CreatePartner(w http.ResponseWriter, r *http.Request) {
 // Loads all partner object from the database.
 func GetAllPartners(w http.ResponseWriter, r *http.Request) {
 	partners := models.GetAllPartners()
-	res, _ := json.Marshal(partners)
+	res, err := json.Marshal(partners)
+	if err != nil {
+		log.Printf("Error marshalling the partners list: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -104,17 +92,21 @@ func GetAllPartners(w http.ResponseWriter, r *http.Request) {
 // FAILS when the passed ID isn't in a valid format & when the
 func GetPartner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, error := uuid.Parse(vars["id"])
-	if error != nil {
-		log.Printf("Failed: %v", error)
+	id, err := uuid.Parse(vars["id"])
+	if err != nil {
+		log.Printf("Failed to parse the UUID: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	// Checking if the ID was parsed into the wrong uuid format
-	if id.String() == "" {
+	if !utils.IsValidUUID(id.String()) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		partner := &models.Partner{}
 		res, err := json.Marshal(partner)
 		if err != nil {
-			log.Printf("Error marshalling: %v", err)
+			log.Printf("Error marshalling the partner object: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 		w.Write(res)
 		return
@@ -122,6 +114,7 @@ func GetPartner(w http.ResponseWriter, r *http.Request) {
 	partner, _ := models.GetPartnerByID(&id)
 	res, err := json.Marshal(partner)
 	if err != nil {
+		log.Printf("Couldn't marshall the partner object! Error: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -135,26 +128,32 @@ func GetPartner(w http.ResponseWriter, r *http.Request) {
 // Checks if the two passed ids are both in a valid format.
 func DeletePartner(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, error := uuid.Parse(vars["id"])
-	if error != nil {
-		log.Printf("Failed: %v", error)
+	id, err := uuid.Parse(vars["id"])
+	if err != nil {
+		log.Printf("Failed to parse the UUID: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
+		log.Printf("The id %v is not a valid UUID format!", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
-	adminid, error := uuid.Parse(vars["adminid"])
-	if error != nil {
-		log.Printf("Failed: %v", error)
+	adminid, err := uuid.Parse(vars["adminid"])
+	if err != nil {
+		log.Printf("Failed to parse the admin id UUID! Error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
+		log.Printf("The admin id %v is not a valid UUID format!", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
 	partner, _ := models.DeletePartnerByID(&id, &adminid)
 	res, err := json.Marshal(partner)
 	if err != nil {
-		log.Printf("Failed: %v", err)
+		log.Printf("Failed to parse the partner object into JSON! Error: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -178,14 +177,19 @@ func UpdatePartner(w http.ResponseWriter, r *http.Request) {
 	var vars map[string]string
 	err := decoder.Decode(&vars)
 	if err != nil {
-		log.Printf("Error decoding: %v", err)
+		log.Printf("Error decoding the request body! Error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	//id
-	id, error := uuid.Parse(vars["id"])
-	if error != nil {
-		log.Printf("Failed: %v", error)
+	id, err := uuid.Parse(vars["id"])
+	if err != nil {
+		log.Printf("Parsing the id as UUID failed! Error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
+		log.Printf("Invalid UUID format of the passed ID! ID: %v", id.String())
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
@@ -196,18 +200,23 @@ func UpdatePartner(w http.ResponseWriter, r *http.Request) {
 	//sincewhen
 	sinceWhen, err := time.Parse("2006-01-02 00:00:00", vars["sinceWhen"])
 	if err != nil {
-		log.Printf("Failed time : %v", err)
+		log.Printf("Failed to parse the time data of the request! Error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	//address
 	address := vars["address"]
 	//phone
 	telephoneNumber := vars["telephoneNumber"]
 	//adminid
-	adminid, error := uuid.Parse(vars["adminid"])
-	if error != nil {
-		log.Printf("Failed: %v", error)
+	adminid, err := uuid.Parse(vars["adminid"])
+	if err != nil {
+		log.Printf("Failed to parse the admin id! Error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
+		log.Printf("The provided admin id is not in a valid UUID format! ID: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
@@ -241,7 +250,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		message := "The project UUID was not provided correctly!"
 		res, err := json.Marshal(message)
 		if err != nil {
@@ -302,7 +311,7 @@ func GetProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		project := &models.Project{}
 		res, err := json.Marshal(project)
 		if err != nil {
@@ -337,7 +346,7 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		log.Printf("The id of the project is not in the right format: %v", id.String())
 		return
@@ -348,7 +357,7 @@ func DeleteProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		log.Printf("No valid admin ID has beed entered: %v", adminid.String())
 		return
@@ -389,7 +398,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("The new ID of the project is an incorrect format!")
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -409,7 +418,7 @@ func UpdateProject(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("Passed admin ID isn't in the right format!")
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -481,7 +490,7 @@ func GetMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("The id was in a bad format: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -512,7 +521,7 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("Deleting message failed due to invalid message ID: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -523,7 +532,7 @@ func DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("The entered admin ID is invalid: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -562,7 +571,7 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("The message ID is in a wrong format: %v", id)
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -591,7 +600,7 @@ func UpdateMessage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("The admin ID is incorrect: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -633,7 +642,7 @@ func CreateAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("The admin ID is incorrect: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -682,7 +691,7 @@ func GetAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("Attempting to get admin failed due to wrong admin ID format: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -714,7 +723,7 @@ func DeleteAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("The ID of the d_admin is incorrect: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -725,7 +734,7 @@ func DeleteAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("The ID of the admin is incorrect: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -763,7 +772,7 @@ func UpdateAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("The ID of the to be updated admin is in the wring format: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -785,7 +794,7 @@ func UpdateAdmin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if adminid.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(adminid.String()) {
 		log.Printf("Entered admin ID, who took the changes, is in the wrong format: %v", adminid)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return
@@ -818,7 +827,7 @@ func UpdateAdminLastTimeOnline(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if id.String() == envs["WRONG_ADMIN_ID_FORMAT"] {
+	if !utils.IsValidUUID(id.String()) {
 		log.Printf("Can't work with this admin ID format: %v", id)
 		w.WriteHeader(http.StatusNotAcceptable)
 		return

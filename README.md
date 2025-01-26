@@ -1,8 +1,5 @@
 TODO - add Readme  
-TODO - add comments 
 TODO - try using standard apis and plain SQL
-TODO - Rework uuid format checking for all controller functions -> just need to check if the returned string is empty
-TODO - Handle all error cases
 
 # GoLang - REST Backend API
 
