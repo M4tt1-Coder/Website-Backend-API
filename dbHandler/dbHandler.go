@@ -1,4 +1,4 @@
-package dbHandler
+package dbhandler
 
 import (
 	//"github.com/jinzhu/gorm"
@@ -8,10 +8,15 @@ import (
 )
 
 var (
-	DB               *gorm.DB
+	// The global database connection instance
+	DB *gorm.DB
+	// Connectionstring to the database
 	connectionString = "root:MySqLt3sT25#@tcp(127.0.0.1:3306)/website?charset=utf8&parseTime=true&loc=Local"
 ) //!!!!change connection string when its finished
 
+// Establishs the database connection
+//
+// Panics if the connection failed to be established.
 func Connect() {
 	//db, err := gorm.Open("mysql", connectionString)
 	db, err := gorm.Open(mysql.Open(connectionString), &gorm.Config{})
@@ -21,6 +26,7 @@ func Connect() {
 	DB = db
 }
 
+// Returns the database connection
 func GetDB() *gorm.DB {
 	return DB
 }

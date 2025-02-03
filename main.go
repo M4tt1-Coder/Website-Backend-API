@@ -10,8 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//TODO - http request should only need one attemp to get the requested resource
-
 func main() {
 	r := mux.NewRouter()
 	routes.AllRoutes(r)
@@ -22,7 +20,7 @@ func main() {
 	println("Listening on port 8080")
 
 	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(
-		handlers.AllowedOrigins([]string{"*"}), //change that to "matthisgeissler.com"
+		handlers.AllowedOrigins([]string{"localhost:5173"}), //change that to "matthisgeissler.com"
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),
 		handlers.AllowedHeaders([]string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"}),
 	)(r)))

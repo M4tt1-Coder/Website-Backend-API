@@ -40,5 +40,5 @@ var AllRoutes = func(router *mux.Router) {
 	router.HandleFunc("/contact/get/", controller.GetContact).Methods("GET")
 
 	//infoCard routes
-	router.HandleFunc("/infoCard/get/", controller.GetInfoCard).Methods("GET")
+	//router.HandleFunc("/infoCard/get/", controller.GetInfoCard).Methods("GET")
 }

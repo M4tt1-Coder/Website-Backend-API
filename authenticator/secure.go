@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Varifies that the incoming request has the
+// required headers and the valid api key.
 func Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Header["Auth_key"] != nil {
@@ -31,6 +33,8 @@ func Authenticate(next http.Handler) http.Handler {
 				w.Write([]byte("Not authenticated"))
 			}
 		} else {
+			// Inform the user that he / she is unauthorized
+			// can't continue to the endpoint without the authorization
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
 		}
