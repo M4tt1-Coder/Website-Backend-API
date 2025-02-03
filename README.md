@@ -1,4 +1,3 @@
-TODO - add Readme  
 TODO - try using standard apis and plain SQL
 
 # GoLang - REST Backend API
@@ -138,4 +137,16 @@ All individual routes can be looked up in the `./routes/routes.go` module.
 }
 ```
 
-The different controller functions sometimes need a http body or url parameter. You can find more information in the documentation of the single functions!
+The different controller functions sometimes need a HTTP body or url parameter. You can find more information in the documentation of the single functions!
+
+## Credits 
+
+Core concepts can be found in the [this](https://www.youtube.com/watch?v=QQfyTmz3a18&list=PL5dTjWUk_cPbjazI1vRuTRZi6o5QlVAAR&index=1) YouTube video of `Akhil Sharma`. 
+
+Besides that, the main technologies are [MySQL](https://www.mysql.com/) and [GORM](https://gorm.io/index.html) for a database and ORM.
+
+### Social Media Links
+
+- [**LinkedIn**](https://www.linkedin.com/in/matthis-gei%C3%9Fler-4198b9258)
+- [**GitHub**](https://github.com/M4tt1-Coder)
+- [**PortFolio Website**](https://matthisgeissler.pages.dev)
